@@ -258,11 +258,20 @@ async function uploadKeImgBB(file) {
   return data.data.url;
 }
 
+
 async function bacaTeksNota(file) {
-  const { data: { text } } = await Tesseract.recognize(file, "ind+eng");
+  const { data: { text } } = await Tesseract.recognize(file, "eng", {
+    logger: (info) => {
+      if (info.status === "recognizing text") {
+        const persen = Math.round(info.progress * 100);
+        notaStatus.textContent = `Membaca nota... ${persen}%`;
+      } else if (info.status === "loading tesseract core" || info.status.includes("loading")) {
+        notaStatus.textContent = "Menyiapkan OCR (pertama kali agak lama)...";
+      }
+    }
+  });
   return text;
 }
-
 function parseTeksNota(text) {
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const hasil = [];
