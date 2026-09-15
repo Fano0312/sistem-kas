@@ -207,57 +207,111 @@ window.hapusTransaksi = async function (id) {
   }
 };
 
-// ====== UPLOAD FOTO NOTA (ImgBB) ======
+// ====== UPLOAD FOTO NOTA (ImgBB) + OCR (Tesseract.js) ======
 btnPilihFoto.addEventListener("click", () => inputFotoNota.click());
 
 inputFotoNota.addEventListener("change", async () => {
   const file = inputFotoNota.files[0];
   if (!file) return;
 
-  notaStatus.textContent = "Mengupload...";
+  notaItemList.innerHTML = "";
+  notaPreviewWrap.classList.remove("hidden");
+  notaPreview.src = URL.createObjectURL(file);
+
+  notaStatus.textContent = "Mengupload & membaca nota...";
+
   try {
-    const formData = new FormData();
-    formData.append("image", file);
+    const [uploadResult, ocrResult] = await Promise.all([
+      uploadKeImgBB(file),
+      bacaTeksNota(file)
+    ]);
 
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-      method: "POST",
-      body: formData
-    });
-    const data = await res.json();
-
-    if (!data.success) throw new Error("Upload gagal");
-
-    notaUrlAktif = data.data.url;
+    notaUrlAktif = uploadResult;
     notaPreview.src = notaUrlAktif;
-    notaPreviewWrap.classList.remove("hidden");
-    notaStatus.textContent = "✓ Terupload";
-    notaItemList.innerHTML = "";
-    tambahBarisItemNota();
+
+    const items = parseTeksNota(ocrResult);
+
+    if (items.length === 0) {
+      notaStatus.textContent = "✓ Terupload (nota tidak terbaca otomatis, isi manual)";
+      tambahBarisItemNota();
+    } else {
+      notaStatus.textContent = `✓ Terupload — ${items.length} barang terdeteksi, cek dulu ya`;
+      items.forEach(item => tambahBarisItemNota(item.nama, item.harga));
+    }
   } catch (err) {
-    notaStatus.textContent = "Gagal upload";
+    notaStatus.textContent = "Gagal upload/baca nota";
     console.error(err);
+    tambahBarisItemNota();
   }
 });
 
-function tambahBarisItemNota() {
+async function uploadKeImgBB(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+    method: "POST",
+    body: formData
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error("Upload ImgBB gagal");
+  return data.data.url;
+}
+
+async function bacaTeksNota(file) {
+  const { data: { text } } = await Tesseract.recognize(file, "ind+eng");
+  return text;
+}
+
+function parseTeksNota(text) {
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const hasil = [];
+  const hargaRegex = /(?:rp\.?\s?)?(\d{1,3}(?:[.,]\d{3})+|\d{4,})\s*$/i;
+  const skipKeywords = [
+    "total", "subtotal", "tunai", "kembali", "bayar", "pajak", "ppn",
+    "diskon", "cash", "change", "no.", "tanggal", "kasir", "struk",
+    "terima kasih", "npwp", "telp", "jl.", "alamat"
+  ];
+
+  lines.forEach(line => {
+    const lower = line.toLowerCase();
+    if (skipKeywords.some(k => lower.includes(k))) return;
+
+    const match = line.match(hargaRegex);
+    if (match) {
+      const hargaStr = match[1].replace(/[.,]/g, "");
+      const harga = parseInt(hargaStr, 10);
+      const nama = line.slice(0, match.index).replace(/rp\.?$/i, "").trim();
+
+      if (nama && nama.length > 1 && harga >= 100) {
+        hasil.push({ nama, harga });
+      }
+    }
+  });
+
+  return hasil;
+}
+
+function tambahBarisItemNota(namaAwal = "", hargaAwal = "") {
   const row = document.createElement("div");
   row.className = "nota-item-row";
   row.innerHTML = `
-    <input type="text" class="nota-nama-barang" placeholder="Nama barang">
-    <input type="number" class="nota-jumlah-barang" placeholder="Harga (Rp)" min="0">
+    <input type="text" class="nota-nama-barang" placeholder="Nama barang" value="${namaAwal.replace(/"/g, "&quot;")}">
+    <input type="number" class="nota-jumlah-barang" placeholder="Harga (Rp)" min="0" value="${hargaAwal}">
     <button type="button" class="btn-remove-item">✕</button>
   `;
   row.querySelector(".btn-remove-item").addEventListener("click", () => row.remove());
   notaItemList.appendChild(row);
 }
 
-btnTambahItemNota.addEventListener("click", tambahBarisItemNota);
+btnTambahItemNota.addEventListener("click", () => tambahBarisItemNota());
 
 btnBatalNota.addEventListener("click", () => {
   notaPreviewWrap.classList.add("hidden");
   notaUrlAktif = "";
   inputFotoNota.value = "";
   notaStatus.textContent = "";
+  notaItemList.innerHTML = "";
 });
 
 btnSimpanNota.addEventListener("click", async () => {
