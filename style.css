@@ -1,0 +1,265 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f4f6f8;
+  color: #222;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app-header {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.app-header h1 {
+  font-size: 28px;
+  color: #1e3a5f;
+}
+
+.app-header .subtitle {
+  color: #666;
+  margin-top: 4px;
+}
+
+.saldo-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.card .label {
+  display: block;
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 6px;
+}
+
+.card .value {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.card.masuk .value { color: #1e8e3e; }
+.card.keluar .value { color: #d93025; }
+.card.saldo .value { color: #1e3a5f; }
+
+.form-section, .riwayat-section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.form-section h2, .riwayat-section h2 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #1e3a5f;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #444;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#btnSubmit {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #eee;
+  color: #333;
+}
+
+.hidden {
+  display: none;
+}
+
+.riwayat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-export {
+  background: #eef2f7;
+  color: #1e3a5f;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.filter-bar select,
+.filter-bar input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background: #f0f3f7;
+  color: #444;
+  font-weight: 600;
+}
+
+.jenis-masuk { color: #1e8e3e; font-weight: 600; }
+.jenis-keluar { color: #d93025; font-weight: 600; }
+
+.aksi-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.btn-edit { background: #fff4e5; color: #b06a00; }
+.btn-delete { background: #fde8e8; color: #d93025; }
+
+.nota-link {
+  font-size: 12px;
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+#notaUploadArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#inputFotoNota { display: none; }
+
+#btnPilihFoto {
+  background: #eef2f7;
+  color: #1e3a5f;
+}
+
+#notaPreview {
+  max-width: 220px;
+  border-radius: 8px;
+  margin: 12px 0;
+  display: block;
+}
+
+.nota-item-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nota-item-row input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.btn-remove-item {
+  background: #fde8e8;
+  color: #d93025;
+  padding: 6px 10px;
+}
+
+.nota-hint {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  .saldo-cards, .form-row {
+    grid-template-columns: 1fr;
+  }
+}

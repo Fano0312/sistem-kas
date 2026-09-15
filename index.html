@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kas Bendahara</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <header class="app-header">
+    <h1>💰 Catatan Kas</h1>
+    <p class="subtitle">Sistem Pencatatan Keuangan Bendahara</p>
+  </header>
+
+  <section class="saldo-cards">
+    <div class="card masuk">
+      <span class="label">Total Pemasukan</span>
+      <span class="value" id="totalMasuk">Rp 0</span>
+    </div>
+    <div class="card keluar">
+      <span class="label">Total Pengeluaran</span>
+      <span class="value" id="totalKeluar">Rp 0</span>
+    </div>
+    <div class="card saldo">
+      <span class="label">Saldo Kas</span>
+      <span class="value" id="saldoKas">Rp 0</span>
+    </div>
+  </section>
+
+  <!-- INPUT DARI FOTO NOTA -->
+  <section class="form-section">
+    <h2>📷 Input dari Foto Nota</h2>
+    <div id="notaUploadArea">
+      <input type="file" id="inputFotoNota" accept="image/*" capture="environment">
+      <button type="button" id="btnPilihFoto">Ambil / Pilih Foto Nota</button>
+      <span id="notaStatus"></span>
+    </div>
+
+    <div id="notaPreviewWrap" class="hidden">
+      <img id="notaPreview" alt="Preview nota">
+      <p class="nota-hint">Nota terupload. Isi barang-barang di nota ini satu per satu:</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tanggal Nota</label>
+          <input type="date" id="notaTanggal">
+        </div>
+        <div class="form-group">
+          <label>Kategori (berlaku untuk semua item)</label>
+          <select id="notaKategori">
+            <option value="Konsumsi">Konsumsi</option>
+            <option value="ATK">ATK</option>
+            <option value="Transport">Transport</option>
+            <option value="Lain-lain">Lain-lain</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="notaItemList"></div>
+      <button type="button" id="btnTambahItemNota" class="btn-secondary">+ Tambah Barang</button>
+      <div class="form-actions" style="margin-top:14px;">
+        <button type="button" id="btnSimpanNota">Simpan Semua Barang</button>
+        <button type="button" id="btnBatalNota" class="btn-secondary">Batal</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INPUT MANUAL -->
+  <section class="form-section">
+    <h2 id="formTitle">Tambah Transaksi Manual</h2>
+    <form id="formTransaksi">
+      <input type="hidden" id="editId">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tanggal">Tanggal</label>
+          <input type="date" id="tanggal" required>
+        </div>
+        <div class="form-group">
+          <label for="jenis">Jenis</label>
+          <select id="jenis" required>
+            <option value="masuk">Pemasukan</option>
+            <option value="keluar">Pengeluaran</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="kategori">Kategori</label>
+          <select id="kategori" required>
+            <option value="Kas Masuk">Kas Masuk</option>
+            <option value="Konsumsi">Konsumsi</option>
+            <option value="ATK">ATK</option>
+            <option value="Transport">Transport</option>
+            <option value="Sumbangan">Sumbangan</option>
+            <option value="Lain-lain">Lain-lain</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="jumlah">Jumlah (Rp)</label>
+          <input type="number" id="jumlah" min="0" required placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="keterangan">Keterangan</label>
+        <input type="text" id="keterangan" placeholder="Contoh: Iuran anggota bulan Sept" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" id="btnSubmit">Tambah Transaksi</button>
+        <button type="button" id="btnCancelEdit" class="btn-secondary hidden">Batal Edit</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- RIWAYAT -->
+  <section class="riwayat-section">
+    <div class="riwayat-header">
+      <h2>Riwayat Transaksi</h2>
+      <div class="export-buttons">
+        <button id="btnExportExcel" class="btn-export">📊 Excel</button>
+        <button id="btnExportPdf" class="btn-export">📄 PDF</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <select id="filterJenis">
+        <option value="">Semua Jenis</option>
+        <option value="masuk">Pemasukan</option>
+        <option value="keluar">Pengeluaran</option>
+      </select>
+      <select id="filterKategori">
+        <option value="">Semua Kategori</option>
+        <option value="Kas Masuk">Kas Masuk</option>
+        <option value="Konsumsi">Konsumsi</option>
+        <option value="ATK">ATK</option>
+        <option value="Transport">Transport</option>
+        <option value="Sumbangan">Sumbangan</option>
+        <option value="Lain-lain">Lain-lain</option>
+      </select>
+      <input type="month" id="filterBulan">
+      <button id="btnResetFilter" class="btn-secondary">Reset</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="tabelTransaksi">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Jenis</th>
+            <th>Kategori</th>
+            <th>Keterangan</th>
+            <th>Jumlah</th>
+            <th>Nota</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyTransaksi">
+          <tr><td colspan="7" class="empty-state">Memuat data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- Export libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script src="script.js"></script>
+</body>
+</html>
+
