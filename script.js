@@ -275,33 +275,39 @@ async function bacaTeksNota(file) {
 function parseTeksNota(text) {
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const hasil = [];
-  const hargaRegex = /(?:rp\.?\s?)?(\d{1,3}(?:[.,]\d{3})+|\d{4,})\s*$/i;
+
+  const hargaDenganRp = /rp\.?\s?(\d{1,3}(?:[.,]\d{3})*)\s*$/i;
+  const hargaDenganPemisah = /(\d{1,3}(?:[.,]\d{3})+)\s*$/;
+  const hargaAngkaPolos = /\b(\d{4,7})\s*$/;
+
   const skipKeywords = [
     "total", "subtotal", "tunai", "kembali", "bayar", "pajak", "ppn",
     "diskon", "cash", "change", "no.", "tanggal", "kasir", "struk",
-    "terima kasih", "npwp", "telp", "jl.", "alamat"
+    "terima kasih", "npwp", "telp", "jl.", "alamat", "whatsapp",
+    "wa ", "customer care", "email", "invoice", "qty", "netto",
+    "included", "cabang", "website", ".com", "member", "poin"
   ];
 
   lines.forEach(line => {
     const lower = line.toLowerCase();
     if (skipKeywords.some(k => lower.includes(k))) return;
 
-    const match = line.match(hargaRegex);
-    if (match) {
-      const hargaStr = match[1].replace(/[.,]/g, "");
-      const harga = parseInt(hargaStr, 10);
-      const nama = line.slice(0, match.index).replace(/rp\.?$/i, "").trim();
+    let match = line.match(hargaDenganRp) || line.match(hargaDenganPemisah) || line.match(hargaAngkaPolos);
+    if (!match) return;
 
-      if (nama && nama.length > 1 && harga >= 100) {
-        hasil.push({ nama, harga });
-      }
+    const hargaStr = match[1].replace(/[.,]/g, "");
+    const harga = parseInt(hargaStr, 10);
+    const nama = line.slice(0, match.index).replace(/rp\.?$/i, "").trim();
+
+    if (nama && nama.length > 1 && harga >= 500 && harga <= 5000000) {
+      hasil.push({ nama, harga });
     }
   });
 
   return hasil;
 }
 
-function tambahBarisItemNota(namaAwal = "", hargaAwal = "") {
+  ]function tambahBarisItemNota(namaAwal = "", hargaAwal = "") {
   const row = document.createElement("div");
   row.className = "nota-item-row";
   row.innerHTML = `
