@@ -276,37 +276,55 @@ function parseTeksNota(text) {
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const hasil = [];
 
-  const hargaDenganRp = /rp\.?\s?(\d{1,3}(?:[.,]\d{3})*)\s*$/i;
-  const hargaDenganPemisah = /(\d{1,3}(?:[.,]\d{3})+)\s*$/;
-  const hargaAngkaPolos = /\b(\d{4,7})\s*$/;
-
   const skipKeywords = [
     "total", "subtotal", "tunai", "kembali", "bayar", "pajak", "ppn",
     "diskon", "cash", "change", "no.", "tanggal", "kasir", "struk",
     "terima kasih", "npwp", "telp", "jl.", "alamat", "whatsapp",
     "wa ", "customer care", "email", "invoice", "qty", "netto",
-    "included", "cabang", "website", ".com", "member", "poin"
+    "included", "cabang", "website", ".com", "member", "poin",
+    "item(s)", "debit", "sale", "batch", "date", "reff", "appr",
+    "trace", "card type", "mid:", "tid:", "signature", "merchant",
+    "ver.", "operator", "penukaran", "hari setelah", "gedung",
+    "jalan", "jenderal"
   ];
+
+  let namaTerakhir = "";
+  const polaQtyHarga = /(\d+)\s*[xX]\s*[\d.,]+\s+([\d.,]{3,})/;
+  const hargaDenganRp = /rp\.?\s?(\d{1,3}(?:[.,]\d{3})*)\s*$/i;
+  const hargaDenganPemisah = /(\d{1,3}(?:[.,]\d{3})+)\s*$/;
 
   lines.forEach(line => {
     const lower = line.toLowerCase();
     if (skipKeywords.some(k => lower.includes(k))) return;
 
-    let match = line.match(hargaDenganRp) || line.match(hargaDenganPemisah) || line.match(hargaAngkaPolos);
-    if (!match) return;
+    const mQty = line.match(polaQtyHarga);
+    if (mQty) {
+      const harga = parseInt(mQty[2].replace(/[.,]/g, ""), 10);
+      const nama = namaTerakhir || "Barang";
+      if (harga >= 500 && harga <= 5000000) {
+        hasil.push({ nama, harga });
+      }
+      return;
+    }
 
-    const hargaStr = match[1].replace(/[.,]/g, "");
-    const harga = parseInt(hargaStr, 10);
-    const nama = line.slice(0, match.index).replace(/rp\.?$/i, "").trim();
+    const mHarga = line.match(hargaDenganRp) || line.match(hargaDenganPemisah);
+    if (mHarga) {
+      const hargaStr = mHarga[1].replace(/[.,]/g, "");
+      const harga = parseInt(hargaStr, 10);
+      const nama = line.slice(0, mHarga.index).replace(/rp\.?$/i, "").trim();
+      if (nama && nama.length > 1 && harga >= 500 && harga <= 5000000) {
+        hasil.push({ nama, harga });
+      }
+      return;
+    }
 
-    if (nama && nama.length > 1 && harga >= 500 && harga <= 5000000) {
-      hasil.push({ nama, harga });
+    if (/[a-zA-Z]{3,}/.test(line) && !/^\d/.test(line)) {
+      namaTerakhir = line;
     }
   });
 
   return hasil;
 }
-
   function tambahBarisItemNota(namaAwal = "", hargaAwal = "") {
   const row = document.createElement("div");
   row.className = "nota-item-row";
