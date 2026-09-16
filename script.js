@@ -307,7 +307,7 @@ function parseTeksNota(text) {
   return hasil;
 }
 
-  ]function tambahBarisItemNota(namaAwal = "", hargaAwal = "") {
+  function tambahBarisItemNota(namaAwal = "", hargaAwal = "") {
   const row = document.createElement("div");
   row.className = "nota-item-row";
   row.innerHTML = `
